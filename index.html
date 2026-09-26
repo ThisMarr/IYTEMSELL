@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MM2 Harvester Store</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#090b12;color:#fff}
+header{padding:18px 7%;background:#111827;border-bottom:1px solid #293244}
+.logo{font-size:24px;font-weight:700;color:#a78bfa}
+main{width:min(900px,90%);margin:45px auto}
+.card{background:#111827;border:1px solid #293244;border-radius:18px;overflow:hidden}
+.pic{height:230px;display:grid;place-items:center;font-size:100px;background:linear-gradient(135deg,#26134f,#111827)}
+.info{padding:25px}.price{font-size:28px;color:#a78bfa;font-weight:700;margin:15px 0}
+button{border:0;border-radius:9px;padding:13px 18px;font-weight:700;cursor:pointer}
+.buy{width:100%;background:#7c3aed;color:white}
+form{display:none;margin-top:25px;background:#111827;border:1px solid #293244;border-radius:18px;padding:25px}
+form.show{display:block}label{display:block;margin:14px 0 7px;color:#bbb}
+input{width:100%;padding:13px;border-radius:8px;border:1px solid #374151;background:#0b0f19;color:#fff}
+.pay{margin-top:18px;background:#22c55e;color:white;width:100%}
+#status{margin-top:15px;color:#fbbf24}
+small{color:#888;line-height:1.5}
+</style>
+</head>
+<body>
+<header><div class="logo">🎮 MM2 Store</div></header>
+<main>
+<section class="card">
+<div class="pic">🪓</div>
+<div class="info">
+<h1>MM2 Harvester</h1>
+<p>Item digital Murder Mystery 2.</p>
+<div class="price">RM 38.00</div>
+<button class="buy" onclick="showForm()">Beli Sekarang</button>
+</div>
+</section>
+
+<form id="checkout" onsubmit="createBill(event)">
+<h2>Checkout</h2>
+<label for="name">Nama</label>
+<input id="name" required maxlength="255" autocomplete="name">
+
+<label for="email">Email</label>
+<input id="email" type="email" required autocomplete="email">
+
+<button class="pay" type="submit">Bayar RM38.00</button>
+<div id="status"></div>
+<p><small>Pembayaran akan dibuka pada halaman Billplz. Jangan masukkan OTP atau PIN perbankan ke website store ini.</small></p>
+</form>
+</main>
+
+<script>
+function showForm(){
+  document.getElementById("checkout").classList.add("show");
+  document.getElementById("checkout").scrollIntoView({behavior:"smooth"});
+}
+
+async function createBill(event){
+  event.preventDefault();
+
+  const status = document.getElementById("status");
+  const button = event.target.querySelector("button[type=submit]");
+
+  status.textContent = "Mencipta bill...";
+  button.disabled = true;
+
+  try{
+    const response = await fetch("/api/create-bill",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        name:document.getElementById("name").value.trim(),
+        email:document.getElementById("email").value.trim()
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(data.error || "Gagal mencipta pembayaran.");
+    }
+
+    window.location.href = data.paymentUrl;
+  }catch(error){
+    status.textContent = error.message;
+    button.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
