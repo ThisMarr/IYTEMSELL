@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameVault</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#0b0f19;color:white}
+header{padding:18px 7%;background:#111827;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.logo{font-size:24px;font-weight:bold;color:#8b5cf6}
+button{cursor:pointer;border:0;color:white}
+.cart-btn,.buy,.checkout{background:#7c3aed;padding:10px 15px;border-radius:8px;font-weight:bold}
+.hero{text-align:center;padding:60px 20px;background:radial-gradient(circle,#312e81,#0b0f19 60%)}
+.hero h1{font-size:45px;margin-bottom:12px}.hero span{color:#a78bfa}.hero p{color:#aaa;margin-bottom:22px}
+.search{width:min(600px,90%);padding:14px;border-radius:10px;border:1px solid #374151;background:#111827;color:white}
+.container{width:86%;margin:35px auto}
+.categories{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:25px}
+.cat{background:#1f2937;padding:10px 18px;border-radius:20px}.cat.active,.cat:hover{background:#7c3aed}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.item{background:#111827;border:1px solid #293244;border-radius:14px;overflow:hidden;transition:.2s}
+.item:hover{transform:translateY(-5px);border-color:#7c3aed}
+.pic{height:160px;background:linear-gradient(135deg,#1e1b4b,#111827);display:grid;place-items:center;font-size:65px}
+.info{padding:16px}.info p{color:#999;font-size:14px;margin:8px 0 14px}.price{color:#a78bfa;font-size:20px;font-weight:bold}.buy{width:100%;margin-top:10px}
+.cart{position:fixed;right:-380px;top:0;width:350px;height:100%;background:#111827;z-index:10;padding:25px;transition:.3s;box-shadow:-10px 0 30px #0008}.cart.open{right:0}
+.cart-head{display:flex;justify-content:space-between;margin-bottom:20px}.close{background:none;font-size:28px}
+.cart-item{padding:12px 0;border-bottom:1px solid #293244;display:flex;justify-content:space-between}.remove{background:#ef4444;padding:5px 8px;border-radius:5px}
+.total{margin-top:20px;font-size:20px;font-weight:bold}.checkout{width:100%;margin-top:15px;background:#22c55e}
+footer{text-align:center;color:#777;padding:30px;margin-top:50px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">🎮 GameVault</div>
+<button class="cart-btn" onclick="toggleCart()">🛒 Cart (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+<h1>Upgrade Your <span>Game</span></h1>
+<p>Item game premium untuk gaming anda.</p>
+<input id="search" class="search" placeholder="🔍 Cari item..." oninput="searchItems()">
+</section>
+
+<div class="container">
+<div class="categories">
+<button class="cat active" onclick="filter('all',this)">Semua</button>
+<button class="cat" onclick="filter('weapon',this)">⚔️ Weapon</button>
+<button class="cat" onclick="filter('skin',this)">🎨 Skin</button>
+<button class="cat" onclick="filter('pet',this)">🐉 Pet</button>
+<button class="cat" onclick="filter('currency',this)">💎 Currency</button>
+</div>
+<div class="items" id="items"></div>
+</div>
+
+<div class="cart" id="cart">
+<div class="cart-head"><h2>🛒 Cart</h2><button class="close" onclick="toggleCart()">×</button></div>
+<div id="cartItems">Cart kosong.</div>
+<div class="total">Jumlah: RM <span id="total">0.00</span></div>
+<button class="checkout" onclick="checkout()">💳 Checkout</button>
+</div>
+
+<footer>© 2026 GameVault</footer>
+
+<script>
+const data=[
+{id:1,n:"Shadow Sword",d:"Pedang legenda dengan kuasa gelap.",p:19.90,c:"weapon",i:"⚔️"},
+{id:2,n:"Dragon Blade",d:"Senjata naga untuk pemain legenda.",p:29.90,c:"weapon",i:"🗡️"},
+{id:3,n:"Cyber Skin",d:"Skin futuristic untuk character.",p:15.90,c:"skin",i:"🤖"},
+{id:4,n:"Golden Knight",d:"Armor emas premium.",p:39.90,c:"skin",i:"🛡️"},
+{id:5,n:"Baby Dragon",d:"Pet naga kecil yang comel.",p:24.90,c:"pet",i:"🐉"},
+{id:6,n:"Cyber Wolf",d:"Pet serigala futuristic.",p:18.90,c:"pet",i:"🐺"},
+{id:7,n:"1000 Gems",d:"1000 gems untuk game.",p:9.90,c:"currency",i:"💎"},
+{id:8,n:"5000 Coins",d:"5000 coins untuk membeli item.",p:14.90,c:"currency",i:"🪙"}
+];
+let cart=[];
+
+function show(list=data){
+document.getElementById("items").innerHTML=list.map(x=>`
+<div class="item"><div class="pic">${x.i}</div><div class="info">
+<h3>${x.n}</h3><p>${x.d}</p><div class="price">RM ${x.p.toFixed(2)}</div>
+<button class="buy" onclick="add(${x.id})">+ Add to Cart</button>
+</div></div>`).join("")||"<p>Item tak dijumpai.</p>";
+}
+function add(id){cart.push(data.find(x=>x.id===id));update();alert("Item ditambah ke cart!")}
+function update(){
+document.getElementById("count").textContent=cart.length;
+document.getElementById("cartItems").innerHTML=cart.length?cart.map((x,i)=>`
+<div class="cart-item"><span>${x.i} ${x.n}<br>RM ${x.p.toFixed(2)}</span>
+<button class="remove" onclick="removeItem(${i})">X</button></div>`).join(""):"Cart kosong.";
+document.getElementById("total").textContent=cart.reduce((s,x)=>s+x.p,0).toFixed(2);
+}
+function removeItem(i){cart.splice(i,1);update()}
+function toggleCart(){document.getElementById("cart").classList.toggle("open")}
+function filter(c,b){
+document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+show(c==="all"?data:data.filter(x=>x.c===c));
+}
+function searchItems(){
+let q=document.getElementById("search").value.toLowerCase();
+show(data.filter(x=>(x.n+" "+x.d).toLowerCase().includes(q)));
+}
+function checkout(){
+if(!cart.length)return alert("Cart masih kosong!");
+alert("Checkout berjaya! Jumlah: RM "+cart.reduce((s,x)=>s+x.p,0).toFixed(2));
+cart=[];update();toggleCart();
+}
+show();
+</script>
+</body>
+</html>
